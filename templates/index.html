@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+</head>
+<body>
+
+{% if session.username %}
+    <p>You are logged in as {{ session.username }}</p>
+    <a href="/logout">Logout</a>
+    <p>Contacts</p>
+        <ul>
+        {% for contact in contacts %}
+            <li> {{ contact }}
+        {% endfor %}
+        </ul>
+    <p>Message threads</p>
+        <ul>
+            {% for thread in threads %}
+                <li> {{ thread }}
+            {% endfor %}
+        </ul>
+{% else %}
+    <form action="/login" method="POST">
+    <p>Username:<br>
+    <input type="text" name="username"></p>
+    <p>Password:<br>
+    <input type="password" name="password"></p>
+    <input type="submit" value="Login">
+    </form>
+{% endif %}
+
+</body>
+</html>
