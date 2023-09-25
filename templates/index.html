@@ -7,8 +7,16 @@
 <body>
 
 {% if session.username %}
-    <p>You are logged in as {{ session.username }}</p>
-    <a href="/logout">Logout</a>
+
+    <span>You are logged in as {{ session.username }}.</span>
+    {% if session.visibility %}
+        <span>Others can see you.</span>
+    {% else %}
+        <span>Only your contacts can see you.</span>
+    {% endif %}
+    <span>They know you as {{ session.alias }}.</span>
+    <span>Want to </span><a href="/logout">logout</a><span> {{ session.alias }}?</span>
+
     <p>Contacts</p>
         <ul>
         {% for contact in contacts %}
@@ -21,7 +29,10 @@
                 <li> {{ thread }}
             {% endfor %}
         </ul>
+
 {% else %}
+
+    <p>Enter your login information:</p>
     <form action="/login" method="POST">
     <p>Username:<br>
     <input type="text" name="username"></p>
@@ -29,6 +40,8 @@
     <input type="password" name="password"></p>
     <input type="submit" value="Login">
     </form>
+    <p><span>Or </span><a href="/create_user">create a user</a></p>
+
 {% endif %}
 
 </body>
