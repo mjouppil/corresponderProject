@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Home Page{% endblock %}
+{% block content %}
+
+{#    <p>Enter your information:</p>#}
+{#    <form action="/register_user" method="POST">#}
+{#    <p>Username:<br>#}
+{#    <input type="text" name="username"></p>#}
+{#    <p>Password:<br>#}
+{#    <input type="password" name="password"></p>#}
+{#    <p>Alias:<br>#}
+{#    <input type="text" name="alias"></p>#}
+{#        <p>Visible to others:<br>#}
+{#    <input type="checkbox" name="visible"></p>#}
+{#    <input type="submit" value="Login">#}
+{#    </form>#}
+{#    <p><span>Or </span><a href="/">go back.</a></p>#}
+
+    <div class="container w-25 p-5">
+        <form action="/register_user" method="POST">
+                <div class="form-floating">
+                    <input type="text" name="username" class="form-control" placeholder="Username">
+                    <label for="floatingInput">Username</label>
+                </div>
+                <div class="form-floating">
+                    <input type="password" name="password" class="form-control" placeholder="Password">
+                    <label for="floatingPassword">Password</label>
+                </div>
+                <div class="form-floating">
+                    <input type="text" name="alias" class="form-control" placeholder="Alias">
+                    <label for="floatingPassword">Alias</label>
+                </div>
+                <div class="form-check py-2">
+                    <input class="form-check-input" name="visible" type="checkbox" value="">
+                    <label class="form-check-label" for="flexCheckDefault">
+                        Visible for other users
+                    </label>
+                </div>
+                <div class="w-50">
+                    <input type="submit" value="Register" class="form-control" id="submit">
+                </div>
+        </form>
+        <div class="py-2">
+{#            <p><span>Or </span><a href="/">go back</a></p>#}
+
+            <p><span>Or </span>
+                <a class="icon-link" href="/">
+                    go back
+                    <svg class="bi" aria-hidden="true"><use href="#arrow-right"></use></svg>
+                </a>
+            </p>
+        </div>
+    </div>
+
+{% endblock %}

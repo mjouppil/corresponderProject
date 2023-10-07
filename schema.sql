@@ -1,7 +1,7 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(48),
-    password VARCHAR(24),
+    password TEXT,
     alias VARCHAR(48),
     visible BOOLEAN
 );

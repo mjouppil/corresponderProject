@@ -1,48 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Index</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Home Page{% endblock %}
+{% block content %}
 
-{% if session.username %}
+    {% if session.username %}
 
-    <span>You are logged in as {{ session.username }}.</span>
-    {% if session.visibility %}
-        <span>Others can see you.</span>
-    {% else %}
-        <span>Only your contacts can see you.</span>
-    {% endif %}
-    <span>They know you as {{ session.alias }}.</span>
-    <span>Want to </span><a href="/logout">logout</a><span> {{ session.alias }}?</span>
+        <span>You are logged in as {{ session.username }}.</span>
+        {% if session.visibility %}
+            <span>Others can see you.</span>
+        {% else %}
+            <span>Only your contacts can see you.</span>
+        {% endif %}
+        <span>They know you as {{ session.alias }}.</span>
+        <span>Want to </span><a href="/logout_user">logout</a><span> {{ session.alias }}?</span>
 
-    <p>Contacts</p>
-        <ul>
-        {% for contact in contacts %}
-            <li> {{ contact }}
-        {% endfor %}
-        </ul>
-    <p>Message threads</p>
-        <ul>
-            {% for thread in threads %}
-                <li> {{ thread }}
+        <div class="container">
+            <p>Contacts</p>
+            <ul class="list-group w-25">
+            {% for contact in contacts %}
+                <li class="list-group-item">
+                    <button type="button" class="btn btn-default">{{ contact }}</button>
+                </li>
             {% endfor %}
-        </ul>
+            </ul>
+            <p>Message threads</p>
+            <ul class="list-group w-25">
+                {% for thread in threads %}
+                    <li class="list-group-item">
+                        <button type="button" class="btn btn-default">{{ thread }}</button>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
 
-{% else %}
 
-    <p>Enter your login information:</p>
-    <form action="/login" method="POST">
-    <p>Username:<br>
-    <input type="text" name="username"></p>
-    <p>Password:<br>
-    <input type="password" name="password"></p>
-    <input type="submit" value="Login">
-    </form>
-    <p><span>Or </span><a href="/create_user">create a user</a></p>
+    {% else %}
 
-{% endif %}
+    <div class="container w-25 p-5">
+        <form action="/login_user" method="POST">
+                <div class="form-floating">
+                    <input type="text" name="username" class="form-control" id="floatingInput" placeholder="Username">
+                    <label for="floatingInput">Username</label>
+                </div>
+                <div class="form-floating">
+                    <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password">
+                    <label for="floatingPassword">Password</label>
+                </div>
+                <div class="w-50 py-2">
+                    <input type="submit" value="Login" class="form-control" id="submit">
+                </div>
+        </form>
+        <div class="container">
+            <p><span>Or </span><a href="/register_user">register a new user</a></p>
+        </div>
+    </div>
 
-</body>
-</html>
+    {% endif %}
+
+{% endblock %}
