@@ -44,12 +44,17 @@ def get_threads():
     user_id = session['user_id']
     print(user_id)
 
-    sql = text('SELECT id, name FROM threads WHERE thread_id IN (SELECT thread_id FROM user_threads WHERE userd_id=:user_id)')
+    sql = text('SELECT id, name FROM threads WHERE id IN (SELECT thread_id FROM user_threads WHERE user_id=:user_id)')
     result = db.session.execute(sql, {'user_id': user_id})
     threads = result.fetchall()
     print(threads)
 
-    return threads
+    ret = []
+    for thread in threads:
+        t = {'id': thread[0], 'name': thread[1]}
+        ret.append(t)
+
+    return ret
 
 
 def get_messages(thread_id):
@@ -58,4 +63,9 @@ def get_messages(thread_id):
     messages = result.fetchall()
     print(messages)
 
-    return messages
+    ret = []
+    for message in messages:
+        m = {'id': message[0], 'message': message[1], 'time': message[2]}
+        ret.append(m)
+
+    return ret

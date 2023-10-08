@@ -13,23 +13,84 @@
         <span>They know you as {{ session.alias }}.</span>
         <span>Want to </span><a href="/logout_user">logout</a><span> {{ session.alias }}?</span>
 
+
+
         <div class="container">
-            <p>Contacts</p>
-            <ul class="list-group w-25">
-            {% for contact in contacts %}
+
+            <p>Users</p>
+            {% if session.users %}
+            <form action="/send_contact_request" method="POST">
+            <ul class="list-group w-50">
+            {% for user in session.users %}
+{#                {{ user|pprint }}#}
                 <li class="list-group-item">
-                    <button type="button" class="btn btn-default">{{ contact }}</button>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-light btn-sm w-100 mx-4">{{ user.alias }}</button>
+                        <button class="btn btn-outline-primary btn-sm w-50 mx-1" type="submit" name="contact_id" value={{ user.id }}>Send request</button>
+                    </div>
                 </li>
             {% endfor %}
             </ul>
-            <p>Message threads</p>
+            </form>
+            {% endif %}
+
+            <p>Contact requests</p>
+            {% if session.contact_requests %}
+            <form action="/answer_contact_request" method="POST">
+            <ul class="list-group w-50">
+            {% for contact_request in session.contact_requests %}
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-outline-light btn-sm w-100 mx-4">{{ contact_request.alias }}</button>
+                        <button class="btn btn-outline-success btn-sm w-25 mx-1" type="submit" name="accept" value={{ contact_request.id }}>Accept</button>
+                        <button class="btn btn-outline-danger btn-sm w-25 mx-1" type="submit" name="decline" value={{ contact_request.id }}>Decline</button>
+                    </div>
+                </li>
+            {% endfor %}
+            </ul>
+            </form>
+            {% endif %}
+
+            <p>Contacts</p>
+            {% if session.contacts %}
+            <ul class="list-group w-50">
+            {% for contact in session.contacts %}
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-outline-light btn-sm w-100 mx-4">{{ contact.alias }}</button>
+                    </div>
+                </li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+
+            <p>Threads</p>
+            {% if session.threads %}
             <ul class="list-group w-25">
-                {% for thread in threads %}
+                {% for thread in session.threads %}
                     <li class="list-group-item">
-                        <button type="button" class="btn btn-default">{{ thread }}</button>
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-outline-light btn-sm w-100 mx-4">{{ thread.name }}</button>
+                        </div>
                     </li>
                 {% endfor %}
             </ul>
+            {% endif %}
+
+            <p>Messages</p>
+            {% if session.messages %}
+            <ul class="list-group w-25">
+                {% for message in session.messages %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <p>{{ message.message }}</p>
+                            <p><span>{{ message.time }}</span><span>{{ message.id }}</span></p>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
         </div>
 
 
@@ -49,8 +110,12 @@
                     <input type="submit" value="Login" class="form-control" id="submit">
                 </div>
         </form>
-        <div class="container">
-            <p><span>Or </span><a href="/register_user">register a new user</a></p>
+        <div>
+            <p><span>Or </span>
+                <a class="icon-link icon-link-hover" href="/register_user">
+                    register a new user
+                </a>
+            </p>
         </div>
     </div>
 

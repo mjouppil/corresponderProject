@@ -5,10 +5,6 @@ from os import getenv, path
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 
-#from sqlalchemy.sql import text
-#import secrets
-#from app import app
-
 
 def create_app():
     basedir = path.abspath(path.dirname(__file__))
@@ -30,12 +26,7 @@ app, db = create_app()
 
 @app.route('/')
 def index():
-    contacts = []
-    threads = []
-    if 'username' in session:
-        contacts = ['Annika', 'Kempesteri', 'Noora', 'Emmi']
-        threads = ['Thread 1', 'Thread 2', 'Thread 3']
-    return render_template('index.html', contacts=contacts, threads=threads)
+    return render_template('index.html')
 
 
 @app.route('/login_user', methods=['GET', 'POST'])
@@ -47,7 +38,6 @@ def login_user():
     password = request.form['password']
 
     ret = users.login(username, password)
-    print(ret)
 
     return redirect('/')
 
@@ -78,7 +68,6 @@ def register_user():
 def delete_user():
 
     print(request.form)
-
     ret = users.delete_user(request)
     print(ret)
 
@@ -98,8 +87,11 @@ def get_contacts():
 def new_thread():
     return
 
+
 def new_message():
     return
+
+
 def get_threads():
     return
 
@@ -110,37 +102,24 @@ def get_messages():
 
 @app.route('/send_contact_request', methods=['POST'])
 def send_contact_request():
-
+    print(request)
     #user_id= request.form['user_id']
     contact_id = request.form['contact_id']
-    contact_token = request.form['contact_token']
+    # contact_token = request.form['contact_token']
 
-    ret = users.send_request(contact_id, contact_token)
+    ret = users.send_request(int(contact_id))
     print(ret)
 
     return redirect('/')
 
 
-@app.route('/accept_contact_request', methods=['POST'])
-def accept_contact_request():
+@app.route('/answer_contact_request', methods=['POST'])
+def answer_contact_request():
 
-    #user_id= request.form['user_id']
-    contacts_id = request.form['contacts_id']
-
-    ret = users.accept_request(contacts_id)
-    print(ret)
-
-    return redirect('/')
-
-
-@app.route('/reject_contact_request', methods=['POST'])
-def reject_contact_request():
-
-    #user_id= request.form['user_id']
-    contacts_id = request.form['contacts_id']
-
-    ret = users.reject_request(contacts_id)
-    print(ret)
+    if 'accept' in request.form:
+        users.accept_request(request.form['accept'])
+    if 'decline' in request.form:
+        users.decline_request(request.form['decline'])
 
     return redirect('/')
 

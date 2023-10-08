@@ -3,7 +3,7 @@ from sqlalchemy.sql import text
 from werkzeug.security import check_password_hash, generate_password_hash
 import secrets
 from app import db
-
+import correspondence
 
 def login(username, password):
 
@@ -11,14 +11,14 @@ def login(username, password):
     result = db.session.execute(sql, {'username': username})
     user = result.fetchone()
 
-    # check_password_hash(user[2], password)
-    # user[2] == password
-
     if user and check_password_hash(user[2], password):
         session['user_id'] = user[0]
         session['username'] = user[1]
         session['alias'] = user[3]
         session['visible'] = user[4]
+
+        load_user_session()
+
         print('LOGIN')
         return True
 
@@ -30,6 +30,11 @@ def logout():
     del session['username']
     del session['alias']
     del session['visible']
+    del session['users']
+    del session['contact_requests']
+    del session['contacts']
+    del session['threads']
+
     print('LOGOUT')
     return True
 
@@ -74,41 +79,72 @@ def delete():
     return False
 
 
+def load_user_session():
+    session['users'] = get_users()
+    session['contact_requests'] = get_contact_requests()
+    session['contacts'] = get_contacts()
+    session['threads'] = correspondence.get_threads()
+    return
+
+
 def get_users():
 
     sql = text('SELECT id, alias FROM users WHERE visible=:visible AND NOT id=:id')
     result = db.session.execute(sql, {'visible': True, 'id': session['user_id']})
     users = result.fetchall()
-    print(users)
-    session['userlist'] = users
 
-    return
+    ret = []
+    for user in users:
+        u = {'id': user[0], 'alias': user[1]}
+        ret.append(u)
+
+    return ret
+
+
+def get_contact_requests():
+
+    sql = text('SELECT id, alias FROM users WHERE id = ANY(SELECT user_id FROM contacts WHERE contact_id=:id AND pending=:pending)')
+    result = db.session.execute(sql, {'id': session['user_id'], 'pending': True})
+    users = result.fetchall()
+
+    print('Request users', users)
+
+    ret = []
+    for user in users:
+        u = {'id': user[0], 'alias': user[1]}
+        ret.append(u)
+    print('request_ret', ret)
+
+    return ret
 
 
 def get_contacts():
 
-    sql = text('SELECT id, alias FROM users WHERE user_id IN (SELECT contact_id AS c_id FROM contacts WHERE user_id:id UNION SELECT user_id AS c_id FROM contacts WHERE contact_id:id)')
-    result = db.session.execute(sql, {'id': session['user_id''']})
-    contacts = result.fetchall()
-    print(contacts)
-    session['contacts'] = contacts
+    sql = text('SELECT id, alias FROM users WHERE id = ANY(SELECT contact_id FROM contacts WHERE user_id=:id AND pending=:pending UNION SELECT user_id FROM contacts WHERE contact_id=:id AND pending=:pending)')
+    result = db.session.execute(sql, {'id': session['user_id'], 'pending': False})
+    users = result.fetchall()
 
-    return
+    ret = []
+    for user in users:
+        u = {'id': user[0], 'alias': user[1]}
+        ret.append(u)
+
+    return ret
 
 
 def send_request(contact_id):
 
     user_id = session['user_id']
 
-    sql = text('SELECT id, username FROM users WHERE username=:username')
-    result = db.session.execute(sql, {'username': username})
+    sql = text('SELECT id, username FROM users WHERE id=:id')
+    result = db.session.execute(sql, {'id': contact_id})
     user = result.fetchone()
 
-    if user:
-        print('USER FOUND: ', user)
+    if not user:
+        print('USER NOT FOUND')
         return False
 
-    sql = text('INSERT INTO contacts (user_id, contact_id, pending) VALUES (:user_id :contact_id, :pending)')
+    sql = text('INSERT INTO contacts (user_id, contact_id, pending) VALUES (:user_id, :contact_id, :pending)')
     db.session.execute(sql, {'user_id': user_id, 'contact_id': contact_id, 'pending': True})
     db.session.commit()
 
@@ -124,35 +160,35 @@ def send_request_by_token(request_token):
     return
 
 
-def accept_request(contacts_id):
+def accept_request(id):
 
-    sql = text('SELECT id, user_id, contact_id, pending FROM contacts WHERE id=:contacts_id')
-    result = db.session.execute(sql, {'contacts_id': contacts_id})
+    sql = text('SELECT id, user_id, contact_id, pending FROM contacts WHERE user_id=:id AND contact_id=:contact_id')
+    result = db.session.execute(sql, {'id': id, 'contact_id': session['user_id']})
     contact = result.fetchone()
 
     if not contact:
         print('CONTACT NOT FOUND: ', contact)
         return False
 
-    sql = text('UPDATE contacts SET pending = False WHERE id=:contacts_id')
-    db.session.execute(sql, {'contacts_id': contacts_id})
+    sql = text('UPDATE contacts SET pending = False WHERE user_id=:id AND contact_id=:contact_id')
+    db.session.execute(sql, {'id': id, 'contact_id': session['user_id']})
     db.session.commit()
 
     return True
 
 
-def reject_request(contacts_id):
+def decline_request(id):
 
-    sql = text('SELECT id, user_id, contact_id, pending FROM contacts WHERE id=:contacts_id')
-    result = db.session.execute(sql, {'contacts_id': contacts_id})
+    sql = text('SELECT id, user_id, contact_id, pending FROM contacts WHERE user_id=:id AND contact_id=:contact_id')
+    result = db.session.execute(sql, {'id': id, 'contact_id': session['user_id']})
     contact = result.fetchone()
 
     if not contact:
         print('CONTACT NOT FOUND: ', contact)
         return False
 
-    sql = text('DELETE FROM contacts WHERE id=:contacts_id')
-    db.session.execute(sql, {'contacts_id': contacts_id})
+    sql = text('DELETE FROM contacts WHERE user_id=:id AND contact_id=:contact_id')
+    db.session.execute(sql, {'id': id, 'contact_id': session['user_id']})
     db.session.commit()
 
     return True
