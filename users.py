@@ -1,4 +1,4 @@
-from flask import redirect, render_template, request, session
+from flask import session, abort
 from sqlalchemy.sql import text
 from werkzeug.security import check_password_hash, generate_password_hash
 import secrets
@@ -16,12 +16,13 @@ def login(username, password):
         session['username'] = user[1]
         session['alias'] = user[3]
         session['visible'] = user[4]
-
+        session['csrf_token'] = get_token()
         load_user_session()
 
         print('LOGIN')
         return True
 
+    print('LOGIN FAILED')
     return False
 
 
@@ -30,6 +31,7 @@ def logout():
     del session['username']
     del session['alias']
     del session['visible']
+    del session['csrf_token']
     del session['users']
     del session['contact_requests']
     del session['contacts']
@@ -60,6 +62,8 @@ def register(request):
     sql = text('INSERT INTO users (username, password, alias, visible) VALUES (:username, :password, :alias, :visible)')
     db.session.execute(sql, {'username': username, 'password': hashed_password, 'alias': alias, 'visible': visible})
     db.session.commit()
+
+    login(username, password)
 
     return True
 
@@ -148,6 +152,8 @@ def send_request(contact_id):
     db.session.execute(sql, {'user_id': user_id, 'contact_id': contact_id, 'pending': True})
     db.session.commit()
 
+    load_user_session()
+
     return True
 
 
@@ -156,6 +162,8 @@ def send_request_by_token(request_token):
     sql = text('SELECT id, user_id FROM contact_tokens WHERE token=:token AND active=:active')
     result = db.session.execute(sql, {'token': request_token, 'active': True})
     user = result.fetchone()
+
+    load_user_session()
 
     return
 
@@ -174,6 +182,8 @@ def accept_request(id):
     db.session.execute(sql, {'id': id, 'contact_id': session['user_id']})
     db.session.commit()
 
+    load_user_session()
+
     return True
 
 
@@ -191,11 +201,21 @@ def decline_request(id):
     db.session.execute(sql, {'id': id, 'contact_id': session['user_id']})
     db.session.commit()
 
+    load_user_session()
+
     return True
 
 
-def get_token(num: 12):
+def get_token(num=12):
     token = secrets.token_hex(num)
     return token
+
+
+def check_csrf_token(token):
+    if token == session['csrf_token']:
+        return True
+    else:
+        abort(403)
+
 
 #print(get_token())

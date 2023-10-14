@@ -20,34 +20,36 @@
             <p>Users</p>
             {% if session.users %}
             <form action="/send_contact_request" method="POST">
-            <ul class="list-group w-50">
-            {% for user in session.users %}
-{#                {{ user|pprint }}#}
-                <li class="list-group-item">
-                    <div class="d-flex justify-content-between">
-                        <button type="button" class="btn btn-outline-light btn-sm w-100 mx-4">{{ user.alias }}</button>
-                        <button class="btn btn-outline-primary btn-sm w-50 mx-1" type="submit" name="contact_id" value={{ user.id }}>Send request</button>
-                    </div>
-                </li>
-            {% endfor %}
-            </ul>
+                <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                <ul class="list-group w-50">
+                {% for user in session.users %}
+    {#                {{ user|pprint }}#}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-light btn-sm w-100 mx-4">{{ user.alias }}</button>
+                            <button class="btn btn-outline-primary btn-sm w-50 mx-1" type="submit" name="contact_id" value={{ user.id }}>Send request</button>
+                        </div>
+                    </li>
+                {% endfor %}
+                </ul>
             </form>
             {% endif %}
 
             <p>Contact requests</p>
             {% if session.contact_requests %}
             <form action="/answer_contact_request" method="POST">
-            <ul class="list-group w-50">
-            {% for contact_request in session.contact_requests %}
-                <li class="list-group-item">
-                    <div class="d-flex justify-content-between">
-                        <button class="btn btn-outline-light btn-sm w-100 mx-4">{{ contact_request.alias }}</button>
-                        <button class="btn btn-outline-success btn-sm w-25 mx-1" type="submit" name="accept" value={{ contact_request.id }}>Accept</button>
-                        <button class="btn btn-outline-danger btn-sm w-25 mx-1" type="submit" name="decline" value={{ contact_request.id }}>Decline</button>
-                    </div>
-                </li>
-            {% endfor %}
-            </ul>
+                <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                <ul class="list-group w-50">
+                {% for contact_request in session.contact_requests %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-outline-light btn-sm w-100 mx-4">{{ contact_request.alias }}</button>
+                            <button class="btn btn-outline-success btn-sm w-25 mx-1" type="submit" name="accept" value={{ contact_request.id }}>Accept</button>
+                            <button class="btn btn-outline-danger btn-sm w-25 mx-1" type="submit" name="decline" value={{ contact_request.id }}>Decline</button>
+                        </div>
+                    </li>
+                {% endfor %}
+                </ul>
             </form>
             {% endif %}
 

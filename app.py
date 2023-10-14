@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import redirect, render_template, request, session, make_response
+from flask import redirect, render_template, request, make_response
 from flask_bootstrap import Bootstrap
 from os import getenv, path
 from dotenv import load_dotenv
@@ -66,6 +66,8 @@ def register_user():
 
 @app.route('/delete_user', methods=['POST'])
 def delete_user():
+
+    users.check_csrf_token(request.form['csrf_token'])
 
     print(request.form)
     ret = users.delete_user(request)
