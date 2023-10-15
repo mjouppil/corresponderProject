@@ -82,16 +82,32 @@ def get_users():
     return
 
 
-def get_contacts():
-    return
+@app.route('/select_contact', methods=['POST'])
+def select_contact():
+    users.check_csrf_token(request.form['csrf_token'])
+    users.select_contact(request.form['contact_id'])
+    return redirect('/')
 
 
+@app.route('/select_thread', methods=['POST'])
+def select_thread():
+    users.check_csrf_token(request.form['csrf_token'])
+    correspondence.select_thread(request.form['thread_id'])
+    return redirect('/')
+
+
+@app.route('/new_thread', methods=['POST'])
 def new_thread():
-    return
+    users.check_csrf_token(request.form['csrf_token'])
+    correspondence.new_thread(request.form['thread_name'])
+    return redirect('/')
 
 
+@app.route('/new_message', methods=['POST'])
 def new_message():
-    return
+    users.check_csrf_token(request.form['csrf_token'])
+    correspondence.new_message(request.form['message'])
+    return redirect('/')
 
 
 def get_threads():
@@ -154,6 +170,7 @@ def server_error():
 
 
 import users
+import correspondence
 
 
 if __name__ == '__main__':

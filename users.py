@@ -27,15 +27,28 @@ def login(username, password):
 
 
 def logout():
-    del session['user_id']
-    del session['username']
-    del session['alias']
-    del session['visible']
-    del session['csrf_token']
-    del session['users']
-    del session['contact_requests']
-    del session['contacts']
-    del session['threads']
+    if 'user_id' in session:
+        del session['user_id']
+    if 'username' in session:
+        del session['username']
+    if 'alias' in session:
+        del session['alias']
+    if 'visible' in session:
+        del session['visible']
+    if 'csrf_token' in session:
+        del session['csrf_token']
+    if 'users' in session:
+        del session['users']
+    if 'contact_requests' in session:
+        del session['contact_requests']
+    if 'contacts' in session:
+        del session['contacts']
+    if 'threads' in session:
+        del session['threads']
+    if 'messages' in session:
+        del session['messages']
+    if 'selected_thread_id' in session:
+        del session['selected_thread_id']
 
     print('LOGOUT')
     return True
@@ -87,7 +100,7 @@ def load_user_session():
     session['users'] = get_users()
     session['contact_requests'] = get_contact_requests()
     session['contacts'] = get_contacts()
-    session['threads'] = correspondence.get_threads()
+    correspondence.get_threads()
     return
 
 
@@ -134,6 +147,11 @@ def get_contacts():
         ret.append(u)
 
     return ret
+
+
+def select_contact(contact_id):
+    print(contact_id)
+    return
 
 
 def send_request(contact_id):
