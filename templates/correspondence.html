@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Home Page{% endblock %}
+{% block content %}
+
+    {% if session.username %}
+
+        <div class="container text-center">
+          <div class="row">
+            <div class="col-4">
+
+                <p>Threads</p>
+
+                <form action="/new_thread" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                    <div class="container my-2 p-0">
+                        <div class="row align-text-center">
+                            <div class="form-floating col-8">
+                                <input type="text" name="thread_name" class="form-control" id="thread_name" placeholder="Thread name">
+                                <label class="mx-2" for="thread_name">Thread name</label>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-outline-light btn-sm" type="submit">New thread</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+
+                {% if session.threads %}
+                <form action="/select_thread" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                    <ul class="list-group">
+                        {% for thread in session.threads %}
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <button class="btn btn-outline-light btn-sm mx-4" type="submit" name="thread_id" value={{ thread.id }}>{{ thread.name }}</button>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </form>
+                {% endif %}
+
+            </div>
+
+            <div class="col-8">
+
+                <p>Messages</p>
+
+                <form action="/new_message" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                    <div class="container m-0 p-0">
+                        <div class="row justify-content-start align-content-center">
+                            <div class="form-floating col-10">
+                                <input type="text" name="message" class="form-control" id="message" placeholder="Message">
+                                <label class="mx-2" for="message">Message</label>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-light btn-sm" type="submit" name="name" value="default_name">Send message</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                {% if session.messages %}
+                <ul class="list-group">
+                    {% for message in session.messages %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <p>{{ message.message }}</p>
+                                <p>{{ message.user_alias }}</p>
+                                <p>{{ message.time }}</p>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+            </div>
+          </div>
+        </div>
+
+    {% endif %}
+
+{% endblock %}

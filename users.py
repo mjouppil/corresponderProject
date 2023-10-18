@@ -17,6 +17,7 @@ def login(username, password):
         session['alias'] = user[3]
         session['visible'] = user[4]
         session['csrf_token'] = get_token()
+
         load_user_session()
 
         print('LOGIN')
@@ -49,6 +50,8 @@ def logout():
         del session['messages']
     if 'selected_thread_id' in session:
         del session['selected_thread_id']
+    if 'selected_user' in session:
+        del session['selected_user']
 
     print('LOGOUT')
     return True
@@ -81,7 +84,7 @@ def register(request):
     return True
 
 
-def delete():
+def delete_user():
 
     user_id = session['user_id']
     sql = text('SELECT id, username FROM users WHERE id=:id')
@@ -93,13 +96,29 @@ def delete():
         db.session.execute(sql, {'id': user_id})
         return True
 
+    logout()
+
     return False
 
 
+def delete_contact(contact_id):
+
+    print('HEP!')
+    print(contact_id)
+
+    sql = text('DELETE FROM ONLY contacts WHERE (user_id=:user_id AND contact_id=:contact_id) OR (user_id=:contact_id AND contact_id=:user_id)')
+    db.session.execute(sql, {'user_id': session['user_id'], 'contact_id': contact_id})
+    db.session.commit()
+
+    get_contacts()
+
+    return
+
+
 def load_user_session():
-    session['users'] = get_users()
-    session['contact_requests'] = get_contact_requests()
-    session['contacts'] = get_contacts()
+    get_users()
+    get_contact_requests()
+    get_contacts()
     correspondence.get_threads()
     return
 
@@ -110,10 +129,14 @@ def get_users():
     result = db.session.execute(sql, {'visible': True, 'id': session['user_id']})
     users = result.fetchall()
 
+    status = check_if_contact(users)
+
     ret = []
     for user in users:
-        u = {'id': user[0], 'alias': user[1]}
+        u = {'id': user[0], 'alias': user[1], 'status': status[user[0]]}
         ret.append(u)
+
+    session['users'] = ret
 
     return ret
 
@@ -132,8 +155,27 @@ def get_contact_requests():
         ret.append(u)
     print('request_ret', ret)
 
+    session['contact_requests'] = ret
+
     return ret
 
+
+def check_if_contact(user_list, ind=0):
+    ret = {}
+
+    for i in user_list:
+        sql = text('SELECT id, pending FROM contacts WHERE (user_id=:user_id AND contact_id=:contact_id) OR (user_id=:contact_id AND contact_id=:user_id)')
+        result = db.session.execute(sql, {'user_id': session['user_id'], 'contact_id': i[ind]})
+        contact = result.fetchone()
+        if contact:
+            if contact[1]:
+                ret[i[ind]] = 'pending'
+            else:
+                ret[i[ind]] = 'contact'
+        else:
+            ret[i[ind]] = 'none'
+
+    return ret
 
 def get_contacts():
 
@@ -141,17 +183,41 @@ def get_contacts():
     result = db.session.execute(sql, {'id': session['user_id'], 'pending': False})
     users = result.fetchall()
 
+    status = check_if_contact(users)
+
     ret = []
     for user in users:
-        u = {'id': user[0], 'alias': user[1]}
+        u = {'id': user[0], 'alias': user[1], 'status': status[user[0]]}
         ret.append(u)
+
+    session['contacts'] = ret
 
     return ret
 
 
-def select_contact(contact_id):
-    print(contact_id)
-    return
+def select_user(contact_id):
+
+    sql = text('SELECT id, alias FROM users WHERE id=:id')
+    result = db.session.execute(sql, {'id': contact_id})
+    user = result.fetchone()
+
+    # sql = text('SELECT id FROM contacts WHERE (user_id=:user_id AND contact_id=:contact_id) OR (user_id=:contact_id AND contact_id=:user_id)')
+    # result = db.session.execute(sql, {'user_id': session['user_id'], 'contact_id': contact_id})
+    # contact = result.fetchone()
+    #
+    # print(contact)
+    #
+    # is_contact = False
+    # if contact:
+    #     is_contact = True
+
+    # is_contact = True if check_if_contact([user]) else False
+
+    ret = {'id': user[0], 'alias': user[1], 'status': check_if_contact([user])[user[0]]}
+    print(ret)
+    session['selected_user'] = ret
+
+    return ret
 
 
 def send_request(contact_id):
@@ -170,9 +236,18 @@ def send_request(contact_id):
     db.session.execute(sql, {'user_id': user_id, 'contact_id': contact_id, 'pending': True})
     db.session.commit()
 
-    load_user_session()
+    get_users()
 
     return True
+
+
+def cancel_contact_request(contact_id):
+    print('DEL', contact_id)
+    sql = text('DELETE FROM ONLY contacts WHERE user_id=:user_id AND contact_id=:contact_id AND pending=:pending')
+    db.session.execute(sql, {'user_id': session['user_id'], 'contact_id': contact_id, 'pending': True})
+    db.session.commit()
+    get_users()
+    return
 
 
 def send_request_by_token(request_token):
@@ -181,7 +256,7 @@ def send_request_by_token(request_token):
     result = db.session.execute(sql, {'token': request_token, 'active': True})
     user = result.fetchone()
 
-    load_user_session()
+    get_users()
 
     return
 
@@ -200,7 +275,8 @@ def accept_request(id):
     db.session.execute(sql, {'id': id, 'contact_id': session['user_id']})
     db.session.commit()
 
-    load_user_session()
+    get_users()
+    get_contact_requests()
 
     return True
 
@@ -219,7 +295,7 @@ def decline_request(id):
     db.session.execute(sql, {'id': id, 'contact_id': session['user_id']})
     db.session.commit()
 
-    load_user_session()
+    get_contact_requests()
 
     return True
 

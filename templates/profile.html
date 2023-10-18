@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Home Page{% endblock %}
+{% block content %}
+
+    <div>
+        <span>You are logged in as {{ session.username }}.</span>
+        {% if session.visibility %}
+            <span>Others can see you.</span>
+        {% else %}
+            <span>Only your contacts can see you.</span>
+        {% endif %}
+        <span>They know you as {{ session.alias }}.</span>
+        <span>Want to </span><a href="/logout_user">logout</a><span> {{ session.alias }}?</span>
+    </div>
+
+{% endblock %}

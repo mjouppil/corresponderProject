@@ -23,6 +23,8 @@ def new_thread(name):
     print('user_thread_id', user_thread_id)
 
     get_threads()
+    select_thread(thread_id)
+    get_messages()
 
     return True
 

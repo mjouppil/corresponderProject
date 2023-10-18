@@ -29,6 +29,22 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/users')
+def users():
+    return render_template('users.html')
+
+
+@app.route('/correspondence')
+def correspondence():
+    correspondence.get_threads()
+    return render_template('correspondence.html')
+
+
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
+
+
 @app.route('/login_user', methods=['GET', 'POST'])
 def login_user():
     if request.method == 'GET':
@@ -36,8 +52,7 @@ def login_user():
 
     username = request.form['username']
     password = request.form['password']
-
-    ret = users.login(username, password)
+    users.login(username, password)
 
     return redirect('/')
 
@@ -53,11 +68,7 @@ def register_user():
     if request.method == 'GET':
         return render_template('register.html')
 
-    print(request.form)
-
     ret = users.register(request)
-    print(ret)
-
     if not ret:
         return redirect('/register_user')
 
@@ -69,77 +80,79 @@ def delete_user():
 
     users.check_csrf_token(request.form['csrf_token'])
 
-    print(request.form)
-    ret = users.delete_user(request)
-    print(ret)
+    # print(request.form)
+    # ret = users.delete_user(request)
+    # print(ret)
 
     return redirect('/logout_user')
 
 
+@app.route('/delete_contact', methods=['POST'])
+def delete_contact():
+    users.check_csrf_token(request.form['csrf_token'])
+    users.delete_contact(request.form['contact_id'])
+    return redirect('/users')
+
+
 @app.route('/get_users')
 def get_users():
+    users.check_csrf_token(request.form['csrf_token'])
     users.get_users()
     return
 
 
-@app.route('/select_contact', methods=['POST'])
-def select_contact():
+@app.route('/select_user', methods=['POST'])
+def select_user():
     users.check_csrf_token(request.form['csrf_token'])
-    users.select_contact(request.form['contact_id'])
-    return redirect('/')
+    users.select_user(request.form['contact_id'])
+    return redirect('/users')
 
 
 @app.route('/select_thread', methods=['POST'])
 def select_thread():
     users.check_csrf_token(request.form['csrf_token'])
     correspondence.select_thread(request.form['thread_id'])
-    return redirect('/')
+    return redirect('/correspondence')
 
 
 @app.route('/new_thread', methods=['POST'])
 def new_thread():
     users.check_csrf_token(request.form['csrf_token'])
     correspondence.new_thread(request.form['thread_name'])
-    return redirect('/')
+    return redirect('/correspondence')
 
 
 @app.route('/new_message', methods=['POST'])
 def new_message():
     users.check_csrf_token(request.form['csrf_token'])
     correspondence.new_message(request.form['message'])
-    return redirect('/')
-
-
-def get_threads():
-    return
-
-
-def get_messages():
-    return
+    return redirect('/correspondence')
 
 
 @app.route('/send_contact_request', methods=['POST'])
 def send_contact_request():
-    print(request)
-    #user_id= request.form['user_id']
+    users.check_csrf_token(request.form['csrf_token'])
     contact_id = request.form['contact_id']
-    # contact_token = request.form['contact_token']
+    users.send_request(int(contact_id))
+    return redirect('/users')
 
-    ret = users.send_request(int(contact_id))
-    print(ret)
 
-    return redirect('/')
+@app.route('/cancel_contact_request', methods=['POST'])
+def cancel_contact_request():
+    users.check_csrf_token(request.form['csrf_token'])
+    contact_id = request.form['contact_id']
+    users.cancel_contact_request(int(contact_id))
+    return redirect('/users')
 
 
 @app.route('/answer_contact_request', methods=['POST'])
 def answer_contact_request():
-
+    users.check_csrf_token(request.form['csrf_token'])
     if 'accept' in request.form:
         users.accept_request(request.form['accept'])
     if 'decline' in request.form:
         users.decline_request(request.form['decline'])
-
-    return redirect('/')
+    return redirect('/users')
 
 
 @app.errorhandler(404)
