@@ -7,34 +7,70 @@
 
     <div class="container text-center">
         <div class="row m-0 p-0">
-            <div class="col-3">
+            <div class="col-4">
+
+                <p>Contact requests</p>
+                {% if session.contact_requests %}
+                <form action="/answer_contact_request" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                    <ul class="list-group border-0">
+                    {% for contact_request in session.contact_requests %}
+                        <li class="list-group-item border-0">
+                            <div class="d-flex justify-content-between">
+                                <button class="btn btn-outline-light btn-sm w-50 mx-1">{{ contact_request.alias }}</button>
+                                <button class="btn btn-outline-success btn-sm w-25 mx-0" type="submit" name="accept" value={{ contact_request.id }}>Accept</button>
+                                <button class="btn btn-outline-danger btn-sm w-25 mx-0" type="submit" name="decline" value={{ contact_request.id }}>Decline</button>
+                            </div>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </form>
+                {% endif %}
 
                 <p>Users</p>
+
+                <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
+                    <input type="radio" class="btn-check" id="btncheck0" autocomplete="off" checked>
+                    <label class="btn btn-outline-light btn-sm" for="btncheck0">All</label>
+
+                    <input type="radio" class="btn-check" id="btncheck1" autocomplete="off">
+                    <label class="btn btn-outline-light btn-sm" for="btncheck1">Contacts</label>
+
+                    <input type="radio" class="btn-check" id="btncheck2" autocomplete="off">
+                    <label class="btn btn-outline-light btn-sm" for="btncheck2">Requests</label>
+
+                    <input type="radio" class="btn-check" id="btncheck3" autocomplete="off">
+                    <label class="btn btn-outline-light btn-sm" for="btncheck3">Pending</label>
+
+                    <input type="radio" class="btn-check" id="btncheck4" autocomplete="off">
+                    <label class="btn btn-outline-light btn-sm" for="btncheck4">Other</label>
+                </div>
+
                 {% if session.users %}
-                    <ul class="list-group">
+                    <ul class="list-group border-0">
                     {% for user in session.users %}
-                            <li class="list-group-item">
+                            <li class="list-group-item border-0">
                                 <div class="d-flex justify-content-between">
-                                    <form action="/select_user" method="POST">
+                                    <form class="w-50 mx-1" action="/select_user" method="POST">
                                         <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                                        <button class="btn btn-outline-light btn-sm" type="submit" name="contact_id" value={{ user.id }}>{{ user.alias }}</button>
+                                        <button class="btn btn-outline-light btn-sm w-100" type="submit" name="contact_id" value={{ user.id }}>{{ user.alias }}</button>
                                     </form>
                                     {% if user.status == 'none' %}
-                                        <form action="/send_contact_request" method="POST">
+                                        <form class="w-50 mx-1" action="/send_contact_request" method="POST">
                                             <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                                            <button class="btn btn-outline-primary btn-sm" type="submit" name="contact_id" value={{ user.id }}>Send request</button>
+                                            <button class="btn btn-outline-primary btn-sm w-100" type="submit" name="contact_id" value={{ user.id }}>Send request</button>
                                         </form>
                                     {% endif %}
                                     {% if user.status == 'pending' %}
-                                        <form action="/cancel_contact_request" method="POST">
+                                        <form class="w-50 mx-1" action="/cancel_contact_request" method="POST">
                                             <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                                            <button class="btn btn-outline-warning btn-sm" type="submit" name="contact_id" value={{ user.id }}>Cancel request</button>
+                                            <button class="btn btn-outline-warning btn-sm w-100" type="submit" name="contact_id" value={{ user.id }}>Cancel request</button>
                                         </form>
                                     {% endif %}
                                     {% if user.status == 'contact' %}
-                                        <form action="/delete_contact" method="POST">
+                                        <form class="w-50 mx-1" action="/delete_contact" method="POST">
                                             <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                                            <button class="btn btn-outline-danger btn-sm" type="submit" name="contact_id" value={{ user.id }}>Remove from contacts</button>
+                                            <button class="btn btn-outline-danger btn-sm w-100" type="submit" name="contact_id" value={{ user.id }}>Remove from contacts</button>
                                         </form>
                                     {% endif %}
                                 </div>
@@ -45,21 +81,21 @@
 
             </div>
 
-            <div class="col-3">
+            <div class="col-4">
 
                 <p>Contacts</p>
                 {% if session.contacts %}
-                    <ul class="list-group">
+                    <ul class="list-group border-0">
                     {% for contact in session.contacts %}
-                        <li class="list-group-item">
+                        <li class="list-group-item border-0">
                             <div class="d-flex justify-content-between">
-                                <form action="/select_user" method="POST">
+                                <form class="w-50 mx-1" action="/select_user" method="POST">
                                     <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                                    <button class="btn btn-outline-light btn-sm" type="submit" name="contact_id" value={{ contact.id }}>{{ contact.alias }}</button>
+                                    <button class="btn btn-outline-light btn-sm w-100" type="submit" name="contact_id" value={{ contact.id }}>{{ contact.alias }}</button>
                                 </form>
-                                <form action="/delete_contact" method="POST">
+                                <form class="w-50 mx-1" action="/delete_contact" method="POST">
                                     <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                                    <button class="btn btn-outline-danger btn-sm" type="submit" name="contact_id" value={{ contact.id }}>Remove from contacts</button>
+                                    <button class="btn btn-outline-danger btn-sm w-100" type="submit" name="contact_id" value={{ contact.id }}>Remove from contacts</button>
                                 </form>
                             </div>
                         </li>
@@ -69,7 +105,7 @@
 
             </div>
 
-            <div class="col-6">
+            <div class="col-4">
                 <p>Profile</p>
                 {% if session.selected_user %}
                     <p>{{ session.selected_user.alias }}</p>

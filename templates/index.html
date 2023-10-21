@@ -4,132 +4,13 @@
 
     {% if session.username %}
 
-        <span>You are logged in as {{ session.username }}.</span>
-        {% if session.visibility %}
-            <span>Others can see you.</span>
-        {% else %}
-            <span>Only your contacts can see you.</span>
-        {% endif %}
-        <span>They know you as {{ session.alias }}.</span>
-        <span>Want to </span><a href="/logout_user">logout</a><span> {{ session.alias }}?</span>
-
-
-
-        <div class="container">
-
-            <p>Users</p>
-            {% if session.users %}
-            <form action="/send_contact_request" method="POST">
-                <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                <ul class="list-group w-50">
-                {% for user in session.users %}
-    {#                {{ user|pprint }}#}
-                    <li class="list-group-item">
-                        <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-outline-light btn-sm w-100 mx-4">{{ user.alias }}</button>
-                            <button class="btn btn-outline-primary btn-sm w-50 mx-1" type="submit" name="contact_id" value={{ user.id }}>Send request</button>
-                        </div>
-                    </li>
-                {% endfor %}
-                </ul>
-            </form>
-            {% endif %}
-
-            <p>Contact requests</p>
-            {% if session.contact_requests %}
-            <form action="/answer_contact_request" method="POST">
-                <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                <ul class="list-group w-50">
-                {% for contact_request in session.contact_requests %}
-                    <li class="list-group-item">
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-outline-light btn-sm w-100 mx-4">{{ contact_request.alias }}</button>
-                            <button class="btn btn-outline-success btn-sm w-25 mx-1" type="submit" name="accept" value={{ contact_request.id }}>Accept</button>
-                            <button class="btn btn-outline-danger btn-sm w-25 mx-1" type="submit" name="decline" value={{ contact_request.id }}>Decline</button>
-                        </div>
-                    </li>
-                {% endfor %}
-                </ul>
-            </form>
-            {% endif %}
-
-            <p>Contacts</p>
-            {% if session.contacts %}
-            <form action="/select_contact" method="POST">
-                <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                <ul class="list-group w-50">
-                {% for contact in session.contacts %}
-                    <li class="list-group-item">
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-outline-light btn-sm w-100 mx-4" type="submit" name="contact_id" value={{ contact.id }}>{{ contact.alias }}</button>
-                        </div>
-                    </li>
-                {% endfor %}
-                </ul>
-            </form>
-            {% endif %}
-
-            <p>Threads</p>
-
-            <div class="d-flex justify-content-between w-50">
-                <form action="/new_thread" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                    <div class="form-floating">
-                        <input type="text" name="thread_name" class="form-control" id="thread_name" placeholder="Thread name">
-                        <label for="thread_name">Thread name</label>
-                    </div>
-                    <button class="btn btn-outline-light btn-sm w-100 mx-4" type="submit">New thread</button>
-                </form>
-            </div>
-
-            {% if session.threads %}
-            <form action="/select_thread" method="POST">
-                <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                <ul class="list-group w-25">
-                    {% for thread in session.threads %}
-                        <li class="list-group-item">
-                            <div class="d-flex justify-content-between">
-                                <button class="btn btn-outline-light btn-sm w-100 mx-4" type="submit" name="thread_id" value={{ thread.id }}>{{ thread.name }}</button>
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </form>
-            {% endif %}
-
-            <p>Messages</p>
-
-            <div class="d-flex justify-content-between w-50">
-                <form action="/new_message" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                    <div class="form-floating">
-                        <input type="text" name="message" class="form-control" id="message" placeholder="Message">
-                        <label for="message">Message</label>
-                    </div>
-                    <button class="btn btn-outline-light btn-sm w-100 mx-4" type="submit" name="name" value="default_name">Send message</button>
-                </form>
-            </div>
-
-            {% if session.messages %}
-            <ul class="list-group w-50">
-                {% for message in session.messages %}
-                    <li class="list-group-item">
-                        <div class="d-flex justify-content-between">
-                            <p>{{ message.message }}</p>
-                            <p>{{ message.user_alias }}</p>
-                            <p>{{ message.time }}</p>
-                        </div>
-                    </li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-
-        </div>
-
+    <div>
+        <h1 class="welcome centered">Welcome {{ session.alias }}</h1>
+    </div>
 
     {% else %}
 
-    <div class="container w-25 p-5">
+    <div class="container centered w-25 p-5">
         <form action="/login_user" method="POST">
                 <div class="form-floating">
                     <input type="text" name="username" class="form-control" id="floatingInput" placeholder="Username">

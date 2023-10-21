@@ -11,7 +11,7 @@ def create_app():
     env_dir = path.join(basedir, '.env')
     load_dotenv(env_dir)
 
-    c_app = Flask(__name__)
+    c_app = Flask(__name__, '/static')
     c_app.secret_key = getenv('SECRET_KEY')
     c_app.config['SQLALCHEMY_DATABASE_URI'] = getenv('DATABASE_URL')
     c_db = SQLAlchemy(c_app)
@@ -117,8 +117,13 @@ def select_thread():
 
 @app.route('/new_thread', methods=['POST'])
 def new_thread():
+    print(request)
+    print(request.form)
+    print(request.form['csrf_token'])
+    print(request.form['thread_name'])
+    print(request.form.getlist('contacts'))
     users.check_csrf_token(request.form['csrf_token'])
-    correspondence.new_thread(request.form['thread_name'])
+    correspondence.new_thread(request.form['thread_name'], request.form.getlist('contacts'))
     return redirect('/correspondence')
 
 

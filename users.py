@@ -129,7 +129,7 @@ def get_users():
     result = db.session.execute(sql, {'visible': True, 'id': session['user_id']})
     users = result.fetchall()
 
-    status = check_if_contact(users)
+    status = check_status(users)
 
     ret = []
     for user in users:
@@ -142,7 +142,6 @@ def get_users():
 
 
 def get_contact_requests():
-
     sql = text('SELECT id, alias FROM users WHERE id = ANY(SELECT user_id FROM contacts WHERE contact_id=:id AND pending=:pending)')
     result = db.session.execute(sql, {'id': session['user_id'], 'pending': True})
     users = result.fetchall()
@@ -160,7 +159,7 @@ def get_contact_requests():
     return ret
 
 
-def check_if_contact(user_list, ind=0):
+def check_status(user_list, ind=0):
     ret = {}
 
     for i in user_list:
@@ -183,7 +182,7 @@ def get_contacts():
     result = db.session.execute(sql, {'id': session['user_id'], 'pending': False})
     users = result.fetchall()
 
-    status = check_if_contact(users)
+    status = check_status(users)
 
     ret = []
     for user in users:
@@ -213,7 +212,7 @@ def select_user(contact_id):
 
     # is_contact = True if check_if_contact([user]) else False
 
-    ret = {'id': user[0], 'alias': user[1], 'status': check_if_contact([user])[user[0]]}
+    ret = {'id': user[0], 'alias': user[1], 'status': check_status([user])[user[0]]}
     print(ret)
     session['selected_user'] = ret
 
