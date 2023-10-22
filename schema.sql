@@ -21,7 +21,8 @@ CREATE TABLE threads (
 CREATE TABLE user_threads (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users,
-    thread_id INTEGER REFERENCES threads
+    thread_id INTEGER REFERENCES threads,
+    admin BOOLEAN
 );
 
 CREATE TABLE messages (

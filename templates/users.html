@@ -4,119 +4,104 @@
 
     {% if session.username %}
 
-
-    <div class="container text-center">
-        <div class="row m-0 p-0">
-            <div class="col-4">
-
-                <p>Contact requests</p>
-                {% if session.contact_requests %}
-                <form action="/answer_contact_request" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                    <ul class="list-group border-0">
-                    {% for contact_request in session.contact_requests %}
-                        <li class="list-group-item border-0">
-                            <div class="d-flex justify-content-between">
-                                <button class="btn btn-outline-light btn-sm w-50 mx-1">{{ contact_request.alias }}</button>
-                                <button class="btn btn-outline-success btn-sm w-25 mx-0" type="submit" name="accept" value={{ contact_request.id }}>Accept</button>
-                                <button class="btn btn-outline-danger btn-sm w-25 mx-0" type="submit" name="decline" value={{ contact_request.id }}>Decline</button>
-                            </div>
-                        </li>
-                    {% endfor %}
-                    </ul>
-                </form>
-                {% endif %}
-
+    <div class="container" style="width: 550px">
                 <p>Users</p>
-
-                <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
-                    <input type="radio" class="btn-check" id="btncheck0" autocomplete="off" checked>
-                    <label class="btn btn-outline-light btn-sm" for="btncheck0">All</label>
-
-                    <input type="radio" class="btn-check" id="btncheck1" autocomplete="off">
-                    <label class="btn btn-outline-light btn-sm" for="btncheck1">Contacts</label>
-
-                    <input type="radio" class="btn-check" id="btncheck2" autocomplete="off">
-                    <label class="btn btn-outline-light btn-sm" for="btncheck2">Requests</label>
-
-                    <input type="radio" class="btn-check" id="btncheck3" autocomplete="off">
-                    <label class="btn btn-outline-light btn-sm" for="btncheck3">Pending</label>
-
-                    <input type="radio" class="btn-check" id="btncheck4" autocomplete="off">
-                    <label class="btn btn-outline-light btn-sm" for="btncheck4">Other</label>
+                <div class="d-flex justify-content-between">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
+                        <form action="/set_list_filter" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                            <input type="submit" class="btn-check" id="btncheck0" autocomplete="off" name="list_filter" value="all">
+                            <label class="btn btn-outline-light btn-sm" for="btncheck0">All</label>
+                            <input type="submit" class="btn-check" id="btncheck1" autocomplete="off" name="list_filter" value="contact">
+                            <label class="btn btn-outline-danger btn-sm" for="btncheck1">Contacts</label>
+                            <input type="submit" class="btn-check" id="btncheck2" autocomplete="off" name="list_filter" value="request">
+                            <label class="btn btn-outline-success btn-sm" for="btncheck2">Requests</label>
+                            <input type="submit" class="btn-check" id="btncheck3" autocomplete="off" name="list_filter" value="pending">
+                            <label class="btn btn-outline-warning btn-sm" for="btncheck3">Pending</label>
+                            <input type="submit" class="btn-check" id="btncheck4" autocomplete="off" name="list_filter" value="other">
+                            <label class="btn btn-outline-primary btn-sm" for="btncheck4">Other</label>
+                        </form>
+                    </div>
+                    <button type="button" class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalToken">Send request by token</button>
                 </div>
 
                 {% if session.users %}
                     <ul class="list-group border-0">
                     {% for user in session.users %}
-                            <li class="list-group-item border-0">
+                        {% if session.list_filter in ['all', user.status] %}
+                            <li class="list-group-item border-0" id={{ user.id }}>
                                 <div class="d-flex justify-content-between">
-                                    <form class="w-50 mx-1" action="/select_user" method="POST">
+                                    <form action="/select_user" method="POST">
                                         <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                                        <button class="btn btn-outline-light btn-sm w-100" type="submit" name="contact_id" value={{ user.id }}>{{ user.alias }}</button>
+                                        <button class="btn btn-outline-light btn-sm threadBtn" type="submit" name="contact_id" value={{ user.id }}>{{ user.alias }}</button>
                                     </form>
-                                    {% if user.status == 'none' %}
-                                        <form class="w-50 mx-1" action="/send_contact_request" method="POST">
+                                    {% if session.list_filter in ["all", user.status] and user.status == "contact" %}
+                                        <form action="/delete_contact" method="POST">
                                             <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                                            <button class="btn btn-outline-primary btn-sm w-100" type="submit" name="contact_id" value={{ user.id }}>Send request</button>
+                                            <input type="hidden" name="alias" value="{{ user.alias }}">
+                                            <button class="btn btn-outline-danger btn-sm userBtn" type="submit" name="contact_id" data-toastValue="Contact {{ user.alias }} deleted" value={{ user.id }}>Remove from contacts</button>
                                         </form>
                                     {% endif %}
-                                    {% if user.status == 'pending' %}
-                                        <form class="w-50 mx-1" action="/cancel_contact_request" method="POST">
+                                    {% if session.list_filter in ['all', user.status] and user.status == "request" %}
+                                        <form action="/answer_contact_request" method="POST">
                                             <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                                            <button class="btn btn-outline-warning btn-sm w-100" type="submit" name="contact_id" value={{ user.id }}>Cancel request</button>
+                                            <input type="hidden" name="alias" value="{{ user.alias }}">
+                                            <div class="d-flex justify-content-between">
+                                                <button class="btn btn-outline-success btn-sm user2Btn" type="submit" name="accept" data-toastValue="Contact request from {{ user.alias }} accepted" value={{ user.id }}>Accept</button>
+                                                <button class="btn btn-outline-danger btn-sm user2Btn" type="submit" name="decline" data-toastValue="Contact request from {{ user.alias }} declined" value={{ user.id }}>Decline</button>
+                                            </div>
                                         </form>
                                     {% endif %}
-                                    {% if user.status == 'contact' %}
-                                        <form class="w-50 mx-1" action="/delete_contact" method="POST">
+                                    {% if session.list_filter in ['all', user.status] and user.status == "pending" %}
+                                        <form action="/cancel_contact_request" method="POST">
                                             <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                                            <button class="btn btn-outline-danger btn-sm w-100" type="submit" name="contact_id" value={{ user.id }}>Remove from contacts</button>
+                                            <input type="hidden" name="alias" value="{{ user.alias }}">
+                                            <button class="btn btn-outline-warning btn-sm userBtn" type="submit" name="contact_id" data-toastValue="Contact request to {{ user.alias }} canceled" value={{ user.id }}>Cancel request</button>
+                                        </form>
+                                    {% endif %}
+                                    {% if session.list_filter in ['all', user.status] and user.status == "other" %}
+                                        <form action="/send_contact_request" method="POST">
+                                            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                                            <input type="hidden" name="alias" value="{{ user.alias }}">
+                                            <button class="btn btn-outline-primary btn-sm userBtn" type="submit" name="contact_id" value={{ user.id }}>Send request</button>
                                         </form>
                                     {% endif %}
                                 </div>
                             </li>
+                        {% endif %}
                     {% endfor %}
                     </ul>
                 {% endif %}
-
             </div>
+    {% endif %}
+<!-- Modal for contact request by token -->
+        <div class="modal fade" id="modalToken" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <form action="/send_contact_request_token" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
 
-            <div class="col-4">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Send a request by token</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
 
-                <p>Contacts</p>
-                {% if session.contacts %}
-                    <ul class="list-group border-0">
-                    {% for contact in session.contacts %}
-                        <li class="list-group-item border-0">
-                            <div class="d-flex justify-content-between">
-                                <form class="w-50 mx-1" action="/select_user" method="POST">
-                                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                                    <button class="btn btn-outline-light btn-sm w-100" type="submit" name="contact_id" value={{ contact.id }}>{{ contact.alias }}</button>
-                                </form>
-                                <form class="w-50 mx-1" action="/delete_contact" method="POST">
-                                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                                    <button class="btn btn-outline-danger btn-sm w-100" type="submit" name="contact_id" value={{ contact.id }}>Remove from contacts</button>
-                                </form>
-                            </div>
-                        </li>
-                    {% endfor %}
-                    </ul>
-                {% endif %}
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="form-floating">
+                            <input type="text" name="contact_token" class="form-control" id="contact_token" placeholder="Insert contact request token">
+                            <label class="mx-0" for="contact_token">Insert contact request token</label>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-outline-success btn-sm">Send contact request</button>
+                </div>
+                </form>
             </div>
-
-            <div class="col-4">
-                <p>Profile</p>
-                {% if session.selected_user %}
-                    <p>{{ session.selected_user.alias }}</p>
-                    <p>{{ session.selected_user.status }}</p>
-                {% endif %}
-            </div>
-
         </div>
     </div>
-
-
-    {% endif %}
 
 {% endblock %}

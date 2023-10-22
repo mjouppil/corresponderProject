@@ -20,66 +20,72 @@
 
     <title>Corresponder</title>
 
-
-{#    <script>#}
-{#        $(document).ready(function(){#}
-{#            $("#toastDismiss").click(function(){#}
-{#                $("#myToast").hide()#}
-{#            });#}
-{#        });#}
-{#    </script>#}
-
   </head>
   <body>
 
     {% if session.username %}
         {% block navbar %}
+            <div class="container align-content-center" style="width: 750px">
             <nav class="navbar navbar-expand-lg bg-dark mx-3">
-              <a class="navbar-brand" href="/">Corresponder</a>
+              <a class="navbar-brand mx-3 align-self-start" href="/">Corresponder</a>
               <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
               </button>
-              <div class="collapse navbar-collapse" id="navbarNav">
+              <div class="collapse navbar-collapse align-content-end" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item">
+                    <li class="nav-item" id="users">
                         <a class="nav-link" href="/users">Users</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" id="correspondence">
                         <a class="nav-link" href="/correspondence">Correspondence</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" id="profile">
                         <a class="nav-link" href="/profile">Profile ({{ session.alias }})</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" id="logout">
                         <a class="nav-link" href="/logout_user">Logout</a>
                     </li>
                 </ul>
 
-                <button type="button" class="btn btn-light" id="toast1" value="hep!">ShowTheToast</button>
-
-                <div class="toast-container position-fixed top-0 end-0 p-3">
-                  <div id="myToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="toast-header">
-                      <img src="../static/images/0-circle.svg" class="rounded me-2" alt="...">
-                      <strong class="me-auto">Bootstrap</strong>
-                      <small>11 mins ago</small>
-                      <button id="toastDismiss" type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                    <div class="toast-body">
-                        <p id="toast-text"></p>
+<!-- Toast for notifications -->
+                <div class="toast-container position-fixed top-0 end-0 mx-2">
+                  <div id="myToast" class="toast align-items-center" data-animation="true" data-autohide="true" data-delay="500" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex justify-content-between">
+                        <div class="toast-body">
+                            <p id="toast-text"></p>
+                        </div>
+                        <button id="toastDismiss" type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
                   </div>
                 </div>
 
               </div>
             </nav>
+        </div>
         {% endblock %}
     {% endif %}
 
     {% block content %}
     {% endblock %}
 
-      <script type="text/javascript" src="../static/js/app.js"></script>
+    <script type="text/javascript" src="../static/js/app.js"></script>
+
+    <script>
+        window.onload = (event) => {
+        console.log(event)
+        if ("{{ toastText }}") {
+            document.getElementById("toast-text").innerHTML = "{{ toastText }}";
+            $("#myToast").show();
+            setTimeout(function() { $("#myToast").hide() }, 3000);
+            }
+        }
+
+        $(document).ready(function(){
+            $("#toastDismiss").click(function(){
+                $("#myToast").hide()
+            });
+        });
+    </script>
 
   </body>
 </html>

@@ -10,13 +10,16 @@ def new_thread(name, contacts):
     db.session.commit()
     thread_id = result.fetchone()[0]
 
-    participants = [int(i) for i in contacts]
-    participants.append(session['user_id'])
-
-    sql = text('INSERT INTO user_threads (user_id, thread_id) VALUES (unnest(:participants), :thread_id) RETURNING id')
-    result = db.session.execute(sql, {'participants': participants, 'thread_id': thread_id})
+    sql = text('INSERT INTO user_threads (user_id, thread_id, admin) VALUES (:user_id, :thread_id, :admin)')
+    db.session.execute(sql, {'user_id': session['user_id'], 'thread_id': thread_id, 'admin': True})
     db.session.commit()
-    result.fetchone()
+
+    if contacts:
+        participants = [int(i) for i in contacts]
+        sql = text('''INSERT INTO user_threads (user_id, thread_id) 
+        VALUES (unnest(:participants), :thread_id) RETURNING id''')
+        db.session.execute(sql, {'participants': participants, 'thread_id': thread_id, 'admin': False})
+        db.session.commit()
 
     get_threads()
     select_thread(thread_id)
@@ -27,8 +30,10 @@ def new_thread(name, contacts):
 
 def new_message(message):
     time = datetime.datetime.now()
-    sql = text('INSERT INTO messages (user_id, thread_id, message, time) VALUES (:user_id, :thread_id, :message, :time) RETURNING id')
-    db.session.execute(sql, {'user_id': session['user_id'], 'thread_id': session['selected_thread_id'], 'message': message, 'time': time})
+    sql = text('''INSERT INTO messages (user_id, thread_id, message, time) 
+    VALUES (:user_id, :thread_id, :message, :time) RETURNING id''')
+    db.session.execute(sql, {'user_id': session['user_id'],
+                             'thread_id': session['selected_thread_id'], 'message': message, 'time': time})
     db.session.commit()
 
     get_messages()
@@ -50,7 +55,8 @@ def get_threads():
 
 
 def get_messages():
-    sql = text('SELECT messages.id, message, time, users.id, users.alias FROM messages INNER JOIN users ON users.id = messages.user_id WHERE thread_id=:thread_id ORDER BY time')
+    sql = text('''SELECT messages.id, message, time, users.id, users.alias FROM messages 
+    INNER JOIN users ON users.id = messages.user_id WHERE thread_id=:thread_id ORDER BY time DESC''')
     result = db.session.execute(sql, {'thread_id': session['selected_thread_id']})
     messages = result.fetchall()
 
@@ -66,5 +72,8 @@ def get_messages():
 
 def select_thread(thread_id):
     session['selected_thread_id'] = thread_id
+    temp = [i['name'] for i in session['threads'] if int(i['id']) == int(thread_id)][0]
+    session['selected_thread_name'] = temp
+
     get_messages()
     return

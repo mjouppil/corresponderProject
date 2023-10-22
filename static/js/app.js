@@ -1,15 +1,18 @@
-const buttonToast = document.getElementById("toast1");
-
-function handleToast(event) {
-    // console.log(event.target.value)
-    $("#myToast").show();
-    document.getElementById("toast-text").innerHTML = event.target.getAttribute('value');
-}
-
-buttonToast.addEventListener("click", handleToast, false);
-
 $(document).ready(function(){
     $("#toastDismiss").click(function(){
         $("#myToast").hide()
     });
 });
+
+
+const modalThread = document.getElementById("modalNewThread")
+if (modalThread) {
+    modalThread.addEventListener('show.bs.modal', event => {
+    })
+}
+
+const modalToken = document.getElementById("modalToken")
+if (modalToken) {
+    modalToken.addEventListener('show.bs.modal', event => {
+    })
+}

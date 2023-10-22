@@ -6,22 +6,22 @@
 
         <div class="container text-center">
           <div class="row">
-            <div class="col-4">
+            <div class="col-3">
 
                 <p>Threads</p>
 
-                <button type="button" class="btn btn-outline-success btn-sm w-100" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="test">Create a new thread</button>
+                <button type="button" class="btn btn-outline-success btn-sm threadBtn mb-2" data-bs-toggle="modal" data-bs-target="#modalNewThread" data-bs-whatever="test">Create a new thread</button>
 
                 {% if session.threads %}
 
                     <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
                     <ul class="list-group border-0">
                         {% for thread in session.threads %}
-                            <li class="list-group-item border-0">
+                            <li class="list-group-item border-0" id={{ thread.id }}>
                                 <div class="d-flex justify-content-between">
                                 <form class="w-100" action="/select_thread" method="POST">
                                     <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                                    <button class="btn btn-outline-light btn-sm w-100" type="submit" name="thread_id" value={{ thread.id }}>{{ thread.name }}</button>
+                                    <button class="btn btn-outline-light btn-sm threadBtn" type="submit" name="thread_id" value={{ thread.id }}>{{ thread.name }}</button>
                                 </form>
                                 </div>
                             </li>
@@ -31,110 +31,87 @@
 
             </div>
 
-            <div class="col-8">
+            <div class="col-9">
 
-                <p>Messages</p>
+                {% if session.selected_thread_id %}
+                    <p>Thread: {{ session.selected_thread_name }}</p>
 
-                <form action="/new_message" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                    <div class="container m-2">
-                        <div class="row">
-                            <div class="form-floating col-10">
-                                <textarea name="message" class="form-control" id="message-text" placeholder="Message"></textarea>
-                                <label class="mx-2" for="message-text">Message</label>
-                            </div>
-                            <div class="col-2">
-                                <button class="btn btn-outline-success btn-sm" type="submit" name="name" value="default_name">Send message</button>
+                    <form action="/new_message" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                        <div class="container m-2">
+                            <div class="row">
+                                <div class="form-floating col-10">
+                                    <textarea name="message" class="form-control" id="message-text" placeholder="Message"></textarea>
+                                    <label class="mx-2" for="message-text">Message</label>
+                                </div>
+                                <div class="col-2">
+                                    <button class="btn btn-outline-success btn-sm" type="submit" name="name" value="default_name">Send message</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
 
-                {% if session.messages %}
-                <ul class="list-group border-0">
-                    {% for message in session.messages %}
-                        <li class="list-group-item border-0">
-                            <div class="d-grid align-content-start">
-                                <div class="row m-0">
-                                    <p class="m-0" style="text-align: left; white-space: pre-wrap">{{ message.message }}</p>
+                    {% if session.messages %}
+                    <ul class="list-group border-0">
+                        {% for message in session.messages %}
+                            <li class="list-group-item border-0" id={{ message.id }}>
+                                <div class="d-grid align-content-start">
+                                    <div class="row m-0">
+                                        <p class="m-0" style="text-align: left; white-space: pre-wrap">{{ message.message }}</p>
+                                    </div>
+                                    <div class="row m-0">
+                                        <p class="m-0" style="text-align: left; font-size: x-small">{{ message.user_alias }} {{ message.time }}</p>
+                                    </div>
                                 </div>
-                                <div class="row m-0">
-                                    <p class="m-0" style="text-align: left; font-size: x-small">{{ message.user_alias }} {{ message.time }}</p>
-                                </div>
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                        <div class="d-flex align-content-start m-4">
+                            <p>No messages</p>
+                        </div>
+                    {% endif %}
                 {% endif %}
-
             </div>
           </div>
         </div>
 <!-- Modal for new thread -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <form action="/new_thread" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Create a new thread</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body">
-
-                    <div class="container">
-                        <div class="form-floating">
-                            <input type="text" name="thread_name" class="form-control" id="thread-name" placeholder="Thread name">
-                            <label class="mx-0" for="thread-name">Thread name</label>
-                        </div>
+        <div class="modal fade" id="modalNewThread" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Create a new thread</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-
-                    <p class="my-3">Select contacts</p>
-                    {% if session.contacts %}
-                        <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Vertical button group">
-                        {% for contact in session.contacts %}
-                            <div class="form-check">
-                                <input type="checkbox" class="btn-check btn-sm" id={{ contact.id }} name="contacts" value={{ contact.id }} autocomplete="off">
-                                <label class="btn" for={{ contact.id }}>{{ contact.alias }}</label>
+                    <form action="/new_thread" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                        <div class="modal-body">
+                            <div class="container my-2">
+                                <div class="form-floating">
+                                    <input type="text" name="thread_name" class="form-control" id="thread-name" placeholder="Thread name">
+                                    <label class="mx-0" for="thread-name">Thread name</label>
+                                </div>
                             </div>
-                        {% endfor %}
+                            <p class="my-2">Select contacts</p>
+                            {% if session.contacts %}
+                                    <div class="btn-group-vertical btn-group-sm my-2" role="group" aria-label="Vertical button group">
+                                    {% for contact in session.contacts %}
+                                        <div class="form-check">
+                                            <input type="checkbox" class="btn-check" id="{{ contact.id }}" name="contacts" value={{ contact.id }}>
+                                            <label class="btn btn-sm" for="{{ contact.id }}">{{ contact.alias }}</label>
+                                        </div>
+                                    {% endfor %}
+                                    </div>
+                            {% endif %}
+                            <div class="modal-footer mt-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-outline-success btn-sm">Create thread</button>
+                            </div>
                         </div>
-                    {% endif %}
-
+                    </form>
                 </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-outline-success">Create thread</button>
-                </div>
-                </form>
             </div>
         </div>
-    </div>
-
     {% endif %}
 
 {% endblock %}
-
-<script>
-    const exampleModal = document.getElementById('exampleModal')
-    if (exampleModal) {
-        exampleModal.addEventListener('show.bs.modal', event => {
-        // Button that triggered the modal
-        const button = event.relatedTarget
-        // Extract info from data-bs-* attributes
-        const recipient = button.getAttribute('data-bs-whatever')
-        // If necessary, you could initiate an Ajax request here
-        // and then do the updating in a callback.
-
-        // Update the modal's content.
-        const modalTitle = exampleModal.querySelector('.modal-title')
-        const modalBodyInput = exampleModal.querySelector('.modal-body input')
-
-        modalTitle.textContent = `New message to ${recipient}`
-        modalBodyInput.value = recipient
-        })
-    }
-</script>

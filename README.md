@@ -21,6 +21,55 @@ An application dedicated to enable personal private correspondence between indiv
 - Messages are displayed as a time based ordered thread.
 - Maybe also extra features such as group threads, message deletion, encrypted messaging etc. now or later on.
 
+#### Setting up and running:
+
+Get the source code.
+
+Create .env-file to project root with following contents:
+>DATABASE_URL="postgresql:///database_name"
+> 
+>SECRET_KEY="insert a secret key here"
+
+Activate virtual environment and install project dependencies:
+
+>$ python3 -m venv venv
+
+>$ source venv/bin/activate
+
+>$ pip install -r ./requirements.txt
+
+Define database tables from schema.sql:
+
+>$ psql (database_name) < schema.sql
+
+Run the Flask application:
+
+>$ flask run
+
+Open the flask-webpage with your browser.
+
+### Status on 22.10.2023:
+
+#### Current status
+
+- Almost ready. It is better than I expected.
+
+#### Tips for testing
+
+- You can register many users and try to connect them, send and respond to contact requests.
+- You can create from the profile page a contact token for a user.
+- Some other user can utilize it to connect with the token owner even though the user would be hidden from other users.
+- Users can make new threads and add their contacts and start messaging.
+
+#### For future development.
+
+- Many many things, for example:
+  - basic thread and message deleting,
+  - admin right handling for threads,
+  - encrypted messaging,
+  - nicer user profile features, like images and colors
+  - etc.
+- There is a known bug, that sometimes when making a new thread, some of the users are not selectable from the list.
 
 ### Status on 8.10.2023:
 

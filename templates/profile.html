@@ -2,15 +2,58 @@
 {% block title %}Home Page{% endblock %}
 {% block content %}
 
-    <div class="centered">
-        <span>You are logged in as {{ session.username }}.</span>
-        {% if session.visibility %}
-            <span>Others can see you.</span>
-        {% else %}
-            <span>Only your contacts can see you.</span>
-        {% endif %}
-        <span>They know you as {{ session.alias }}.</span>
-        <span>Want to </span><a href="/logout_user">logout</a><span> {{ session.alias }}?</span>
-    </div>
+<div class="container text-left centered" style="width: 800px">
+  <div class="row">
+    <div class="col-12">
 
+        <p>You are logged in as {{ session.username }}.</p>
+        {% if session.visible %}
+            <p>Others can see you.</p>
+        {% else %}
+            <p>Only your contacts can see you if you have any.</p>
+        {% endif %}
+        <p>They know you as {{ session.alias }}.</p>
+
+
+        <form class="w-75" action="/change_profile_visibility" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+            <div class="d-flex justify-content-between my-4">
+                <p>Change your profile visibility: </p>
+                {% if session.visible %}
+                    <button class="btn btn-outline-light btn-sm threadBtn mx-4" type="submit" name="visibility" value="false">Hide profile from non-contact user</button>
+                {% else %}
+                    <button class="btn btn-outline-light btn-sm threadBtn mx-4" type="submit" name="visibility" value="true">Reveal profile to all users</button>
+                {% endif %}
+            </div>
+        </form>
+
+        <div class="d-flex justify-content-between w-75 my-4">
+            <p>Your tokens:</p>
+            <form action="/create_new_token" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                <button class="btn btn-outline-light btn-sm threadBtn mx-4" type="submit" name="token">Create new contact token</button>
+            </form>
+        </div>
+        {% if session.contact_tokens %}
+            <ul class="list-group w-75 border-0 my-4">
+                {% for token in session.contact_tokens %}
+                    <li class="list-group-item border-0" id={{ token.id }}>
+                        <form action="/delete_contact_token" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                            <div class="d-flex justify-content-between w-75">
+                                <p>{{ token.token }}</p>
+                                <button class="btn btn-outline-danger btn-sm user2Btn" type="submit" name="token_id" value="{{ token.id }}">Delete</button>
+                            </div>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <p>Maybe later we will let you change your other profile settings.</p>
+        <span>Want to </span><a href="/logout_user">logout</a><span> {{ session.alias }}?</span>
+
+    </div>
+  </div>
+</div>
 {% endblock %}

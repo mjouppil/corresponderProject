@@ -1,5 +1,13 @@
+body {
+    position: relative;
+}
+
 .btn {
     position: relative;
+}
+
+.customBtn {
+    width: 150px;
 }
 
 .welcome {
@@ -14,4 +22,25 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+#liveAlertPlaceholder {
+    position: relative;
+    align-self: end;
+    bottom: 0px;
+    right: 0px;
+    margin: 10px;
+}
+
+.userBtn {
+    width: 200px;
+}
+
+.user2Btn {
+    width: 100px;
+}
+
+.threadBtn {
+    width: 270px;
+    margin: 0px 10px 0px 0px;
 }
